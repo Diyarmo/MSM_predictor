@@ -50,5 +50,10 @@ def encode_col(encoder, data, col_name):
     else:
       data.at[i, col_name] = encoder["OTHER"]
   return data
-  
-  
+
+# <---------------------------------------------------------->#
+data_file_address = "drive/My Drive/data.csv"
+test_file_address = "drive/My Drive/test.csv"
+
+data = read_and_clean_file(data_file_address)
+test = read_and_clean_file(test_file_address)
