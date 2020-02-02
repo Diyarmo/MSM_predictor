@@ -11,7 +11,7 @@ from keras import regularizers
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 
-
+# <-------------------------------------------> #
 def read_and_clean_file(filename):
   data = pd.read_csv(filename)
   data = data.drop(["Unnamed: 0", "Name of show"], axis=1) #"Name of show" and "Episode" are same
@@ -51,9 +51,38 @@ def encode_col(encoder, data, col_name):
       data.at[i, col_name] = encoder["OTHER"]
   return data
 
+
+def fill_NAs(data):
+  data["Start_time"] = data["Start_time"].fillna(np.round(data["Start_time"].mean()*2)/2)
+
+  Temp = pd.DataFrame(data.groupby( ["Year", "Month", "Day", "Start_time"])["Temperature in Montreal during episode"].mean())
+  NanIndex = data["Temperature in Montreal during episode"][data["Temperature in Montreal during episode"].isnull()].index
+  for i in NanIndex:
+    d = data.loc[i]
+    data.at[i, "Temperature in Montreal during episode"] = Temp.loc[d["Year"], d["Month"], d["Day"], d["Start_time"]].values[0]
+
+  Temp = pd.DataFrame(data.groupby( ["Year", "Month", "Day"])["Temperature in Montreal during episode"].mean())
+  NanIndex = data["Temperature in Montreal during episode"][data["Temperature in Montreal during episode"].isnull()].index
+  for i in NanIndex:
+    d = data.loc[i]
+    data.at[i, "Temperature in Montreal during episode"] = Temp.loc[d["Year"], d["Month"], d["Day"]].values[0]
+  return data
+
+
 # <---------------------------------------------------------->#
 data_file_address = "drive/My Drive/data.csv"
 test_file_address = "drive/My Drive/test.csv"
 
 data = read_and_clean_file(data_file_address)
 test = read_and_clean_file(test_file_address)
+
+print("Count of NA in columns before filling NAs")
+print(data.isnull().sum())
+
+data = fill_NAs(data)
+test = fill_NAs(test)
+
+print("Count of NA in columns after filling NAs")
+print(data.isnull().sum())
+
+
