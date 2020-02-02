@@ -85,4 +85,12 @@ test = fill_NAs(test)
 print("Count of NA in columns after filling NAs")
 print(data.isnull().sum())
 
+vocab_size = 3000
+encoder = get_column_encoder(data, "Episode", vocab_size)
 
+data = encode_col(encoder, data, "Episode")
+test = encode_col(encoder, test, "Episode")
+
+
+data["Episode"] = data["Episode"].astype(int)
+test["Episode"] = test["Episode"].astype(int)
