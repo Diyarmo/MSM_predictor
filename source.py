@@ -68,6 +68,14 @@ def fill_NAs(data):
     data.at[i, "Temperature in Montreal during episode"] = Temp.loc[d["Year"], d["Month"], d["Day"]].values[0]
   return data
 
+def add_missing_cols(ready_data, ready_test):
+  missed_columns_in_test = ready_data.columns[ready_data.columns.isin(ready_test.columns) == False][:-1]
+  for col in missed_columns_in_test:
+    ready_test = ready_test.join(pd.Series(np.zeros(test.shape[0]), name=col).astype(int))
+  cols = list(ready_data.columns)
+  del(cols[-3])
+  ready_test = ready_test[cols]
+  return ready_test
 
 # <---------------------------------------------------------->#
 data_file_address = "drive/My Drive/data.csv"
@@ -94,3 +102,10 @@ test = encode_col(encoder, test, "Episode")
 
 data["Episode"] = data["Episode"].astype(int)
 test["Episode"] = test["Episode"].astype(int)
+
+ready_data = pd.get_dummies(data[data.select_dtypes(object).columns], drop_first=True).join(data.select_dtypes(np.number))
+ready_test = pd.get_dummies(test[test.select_dtypes(object).columns], drop_first=True).join(test.select_dtypes(np.number))
+
+ready_test = add_missing_cols(ready_data, ready_test)
+
+
